@@ -1,12 +1,21 @@
  const Router = require('koa-router');
 
 const Book = require('../models/book');
+const  commonUtility  = require('../utils/common-utility');
 const router = new Router();
 
-router.get('/api', async (ctx) => {
+router.get('/api', async (ctx,next) => {
     console.log('koa router get method');
-    const books=  await Book.find({});
-    ctx.body = books;
+    await commonUtility.getTestData()
+    .then(res => {
+        ctx.body = res;
+    })
+    .catch(err =>
+    {
+        ctx.body = err;
+    })
+    
+    //yield next;
 });
 
 router.get('/api/:bookId',async ctx =>{
@@ -15,12 +24,14 @@ const searchedBook = await Book.findById(ctx.params.bookId);
     ctx.body = searchedBook;
 });
 
-router.post('/api/save', async (ctx) => {
+router.post('/api/save', async (next) => {
     try{
         console.log('post save method', ctx.request.body);
-        await Book.create(ctx.request.body);
         const allBooks = await Book.find({});
-        ctx.body = allBooks;
+        ctx.body = allBooks; 
+        /* await Book.create(ctx.request.body);
+        const allBooks = await Book.find({});
+        ctx.body = allBooks; */
     }
     catch(err){
         res.status(404).send(err);
